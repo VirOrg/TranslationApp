@@ -14,7 +14,7 @@ def convertXML(url) {
     new JsonSlurper().parse(new URL(url)).with { j ->
         new StringWriter().with { sw ->
             new MarkupBuilder(sw)."resources" {
-                j.each { data ->
+                j.translation.each { data ->
                     string(name: data.key, data.value)
                 }
             }

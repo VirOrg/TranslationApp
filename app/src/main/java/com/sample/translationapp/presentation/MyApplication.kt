@@ -1,4 +1,4 @@
-package com.sample.translationapp
+package com.sample.translationapp.presentation
 
 import android.app.Application
 import com.example.assignmentproject.di.AppModule

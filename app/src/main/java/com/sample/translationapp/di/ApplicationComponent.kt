@@ -1,6 +1,6 @@
 package com.example.assignmentproject.di
 
-import com.sample.translationapp.MyApplication
+import com.sample.translationapp.presentation.MyApplication
 import dagger.Component
 import dagger.android.support.AndroidSupportInjectionModule
 import javax.inject.Singleton

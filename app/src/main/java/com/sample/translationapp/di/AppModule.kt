@@ -3,7 +3,7 @@ package com.example.assignmentproject.di
 import android.app.Application
 import android.content.Context
 import com.google.gson.Gson
-import com.sample.translationapp.LanguageService
+import com.sample.translationapp.service.LanguageService
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit

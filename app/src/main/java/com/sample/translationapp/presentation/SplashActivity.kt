@@ -8,7 +8,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.sample.translationapp.R
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_splash.*
 import javax.inject.Inject
 
@@ -29,6 +28,7 @@ class SplashActivity : AppCompatActivity() {
                     Intent(this, MainActivity::class.java).also {
                         startActivity(it)
                     }
+                    finish()
                 }
                 SplashState.Loading ->
                     progressBar.visibility = View.VISIBLE

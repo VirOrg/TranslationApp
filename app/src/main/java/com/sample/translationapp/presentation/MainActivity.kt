@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.sample.translationapp.R
 import com.sample.translationapp.data.ILanguageService
-import com.sample.translationapp.service.LanguageService
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
@@ -19,6 +18,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         AndroidInjection.inject(this)
         text.text = languageService.translate(R.string.hello_world)
+        btn_bonus.text = languageService.translate(R.string.bonus)
 
         btn_english.setOnClickListener {
             text.text = languageService.translate(R.string.hello_world, "en")

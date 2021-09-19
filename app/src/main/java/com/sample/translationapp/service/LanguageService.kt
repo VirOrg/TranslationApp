@@ -91,7 +91,7 @@ class LanguageService(private val context: Context, retrofit: Retrofit, private 
     }
 
     override fun translate(id: Int): String {
-        val defaultLocale = Resources.getSystem().getConfiguration().locale
+        val defaultLocale = resources.configuration.locale
         return getTranslation(id, defaultLocale.language)
     }
 
@@ -114,15 +114,16 @@ class LanguageService(private val context: Context, retrofit: Retrofit, private 
     }
 
     private fun getTranslationFromResource(@StringRes resId: Int, lang: String): String {
-        return setLocale(lang).getString(resId)
+        setLocale(lang)
+        return resources.getString(resId)
     }
 
-    private fun setLocale(lang: String): Resources {
+    private fun setLocale(lang: String) {
         val confAr = resources.getConfiguration()
         confAr.locale = Locale(lang)
         val metrics = DisplayMetrics()
-        val resources = Resources(assets, metrics, confAr)
-        return resources
+        //val _resources = Resources(assets, metrics, confAr)
+        resources.updateConfiguration(confAr, resources.displayMetrics)
     }
 
     private fun readRawJson(@RawRes rawResId: Int): TranslationVersion {

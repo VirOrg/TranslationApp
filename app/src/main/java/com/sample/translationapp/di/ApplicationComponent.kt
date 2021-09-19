@@ -1,4 +1,4 @@
-package com.example.assignmentproject.di
+package com.sample.translationapp.di
 
 import com.sample.translationapp.presentation.MyApplication
 import dagger.Component
@@ -12,7 +12,8 @@ import javax.inject.Singleton
 @Component(
     modules = [
         AndroidSupportInjectionModule::class,
-        AppModule::class
+        AppModule::class,
+        ActivityBuilderDI::class
     ]
 )
 interface ApplicationComponent {

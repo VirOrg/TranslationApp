@@ -1,8 +1,8 @@
 package com.sample.translationapp.presentation
 
 import android.app.Application
-import com.example.assignmentproject.di.AppModule
-import com.example.assignmentproject.di.DaggerApplicationComponent
+import com.sample.translationapp.di.AppModule
+import com.sample.translationapp.di.DaggerApplicationComponent
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector

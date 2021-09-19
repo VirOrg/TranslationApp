@@ -1,20 +1,23 @@
 package com.sample.translationapp.service
 
 import android.content.Context
+import android.content.res.Resources
+import android.util.DisplayMetrics
 import androidx.annotation.RawRes
+import androidx.annotation.StringRes
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.sample.translationapp.R
 import com.sample.translationapp.data.ILanguageService
 import com.sample.translationapp.data.entity.TranslationVersion
 import com.sample.translationapp.data.entity.Translations
-import com.sample.translationapp.presentation.SameIsInAlreadySyncException
+import com.sample.translationapp.presentation.TranslationIsInAlreadySyncException
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
 import retrofit2.Retrofit
+import java.util.*
+
 
 /**
  * Created by Vinit Saxena on 18/09/21.
@@ -23,9 +26,10 @@ class LanguageService(private val context: Context, retrofit: Retrofit, private 
     ILanguageService {
     private val translationMap = mutableMapOf<String, Map<String, String>>()
     private val translationApi: TranslationApi = retrofit.create(TranslationApi::class.java)
+    private val resources = context.resources
+    private val assets = context.assets
 
-    override fun sync() {
-
+    override fun sync(call: (Boolean) -> Unit) {
         val localTranslationVersion = Single.fromCallable {
             val localTranslationVersion: TranslationVersion = readRawJson(R.raw.translation_version)
             return@fromCallable localTranslationVersion
@@ -61,11 +65,11 @@ class LanguageService(private val context: Context, retrofit: Retrofit, private 
                         }
                 } else {
                     return@flatMap Single.fromCallable {
-                        throw SameIsInAlreadySyncException()
+                        throw TranslationIsInAlreadySyncException()
                     }
                 }
             }.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .observeOn(Schedulers.computation())
             .subscribe({ langsTrans ->
                 langsTrans.forEach {
                     val transMap = mutableMapOf<String, String>()
@@ -74,15 +78,56 @@ class LanguageService(private val context: Context, retrofit: Retrofit, private 
                     }
                     translationMap.put(it.code, transMap)
                 }
+                call.invoke(true)
             }, { exception ->
                 exception.printStackTrace()
+                call.invoke(false)
             })
 
     }
 
-    private fun <T> readRawJson(@RawRes rawResId: Int): T {
+    override fun translate(@StringRes id: Int, lang: String): String {
+        return getTranslation(id, lang)
+    }
+
+    override fun translate(id: Int): String {
+        val defaultLocale = Resources.getSystem().getConfiguration().locale
+        return getTranslation(id, defaultLocale.language)
+    }
+
+    private fun getTranslation(@StringRes resId: Int, lang: String): String {
+        val key = try {
+            resources.getResourceEntryName(resId)
+        } catch (e: Resources.NotFoundException) {
+            return ""
+        }
+        return if (translationMap.get(lang)?.containsKey(key) == true) {
+            setLocale(lang)
+            return translationMap.get(lang)?.get(key) ?: ""
+        } else {
+            try {
+                getTranslationFromResource(resId, lang)
+            } catch (e: Resources.NotFoundException) {
+                return key
+            }
+        }
+    }
+
+    private fun getTranslationFromResource(@StringRes resId: Int, lang: String): String {
+        return setLocale(lang).getString(resId)
+    }
+
+    private fun setLocale(lang: String): Resources {
+        val confAr = resources.getConfiguration()
+        confAr.locale = Locale(lang)
+        val metrics = DisplayMetrics()
+        val resources = Resources(assets, metrics, confAr)
+        return resources
+    }
+
+    private fun readRawJson(@RawRes rawResId: Int): TranslationVersion {
         context.resources.openRawResource(rawResId).bufferedReader().use {
-            return gson.fromJson<T>(it, object : TypeToken<T>() {}.type)
+            return gson.fromJson(it, TranslationVersion::class.java)
         }
     }
 }

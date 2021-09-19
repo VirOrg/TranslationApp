@@ -1,7 +1,8 @@
-package com.sample.translationapp
+package com.sample.translationapp.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.sample.translationapp.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

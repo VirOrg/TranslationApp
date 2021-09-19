@@ -14,7 +14,7 @@ def convertXML(url) {
     new JsonSlurper().parse(new URL(url)).with { j ->
         new StringWriter().with { sw ->
             new MarkupBuilder(sw)."resources" {
-                j.each { data ->
+                j.translation.each { data ->
                     string(name: data.key, data.value)
                 }
             }
@@ -24,7 +24,7 @@ def convertXML(url) {
 }
 
 
-def dumpLocally(translation, targetPath) {
+def dumpTranslationLocally(translation, targetPath) {
     def log = project.logger
     InputStream stream = new ByteArrayInputStream(translation.getBytes('UTF-8'))
     def output = new File(targetPath)
@@ -39,6 +39,20 @@ def dumpLocally(translation, targetPath) {
     }
 }
 
+def dumpTranslationVersion(url, targetPath) {
+    def log = project.logger
+
+    log.quiet("Version Url : " + url)
+
+    def output = new File(targetPath)
+    output.parentFile.mkdirs()
+
+    log.quiet("Version Resource Path : " + targetPath)
+    URLConnection urlConnection = new URL(url).openConnection()
+    urlConnection.inputStream.withStream{
+        is -> output.withOutputStream { os -> os << is }
+    }
+}
 def updateDefaultTranslation(baseUrl, targetFileName){
     def log = project.logger
     def langUrl = "${baseUrl}en"
@@ -51,14 +65,25 @@ def updateDefaultTranslation(baseUrl, targetFileName){
     def translation = convertXML(langUrl)
     log.quiet("json Translation : " + translation.toString())
 
-    dumpLocally(translation, stringFile)
+    dumpTranslationLocally(translation, stringFile)
+}
+
+def updateTranslationVersion(baseUrl){
+    def log = project.logger
+    def versionUrl = "${baseUrl}version"
+    log.quiet("Version URL : " + versionUrl)
+    def resPath = "${project.projectDir.absoluteFile}/app/src/main/res/raw/translation_version.json"
+    log.quiet("Version Resource Path : " + resPath)
+    dumpTranslationVersion(versionUrl,resPath)
 }
 task(updateTranslations) {
     def log = project.logger
     group = "Translate"
     def languages = fetchJson("${BASE_URL}${SUPPORTED_LANGUAGES}")
     log.quiet("LANGUAGES : " + languages)
+    updateTranslationVersion(BASE_URL)
     updateDefaultTranslation(BASE_URL,RES_FILENAME)
+
 
     languages.each { lang ->
         def langUrl = "${BASE_URL}${lang.code}"
@@ -71,7 +96,7 @@ task(updateTranslations) {
         def translation = convertXML(langUrl)
         log.quiet("json Translation : " + translation.toString())
 
-        dumpLocally(translation, stringFile)
+        dumpTranslationLocally(translation, stringFile)
 
     }
 }
